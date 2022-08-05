@@ -61,14 +61,16 @@ def plot_allosteric_mutability():
         show_rug=False,
         show_hist=False,
     )
-    fig.update_layout(title="Mutations in allosteric sites", width=500, height=500)
+    fig.update_layout(width=500, height=500)
     fig.update_layout(
+        title="Allosteric site vs other parts of the protein mutation significance",
         legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
         margin=dict(l=20, r=20, t=40, b=20),
         paper_bgcolor="rgba(0,0,0,0)",
         # plot_bgcolor="rgba(0,0,0,0)",
     )
-    fig.update_xaxes(range=[0, 0.5])
+    fig.update_xaxes(range=[0, 0.5], title="ESM distance")
+    fig.update_yaxes(title="Frequency")
     return fig
 
 
@@ -87,7 +89,7 @@ def get_pam_blosum(mat_sim):
         return (matrix - mn) / (mx - mn)
 
     colors = ["#0f6feb", "#f4080b"]
-    fig = make_subplots(rows=1, cols=2, subplot_titles=("Pam", "esm"))
+    fig = make_subplots(rows=1, cols=2, subplot_titles=("PAM", "ESM"))
     pam = pd.read_csv("ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/PAM30", sep="\s+", comment="#").iloc[:20, :20]
     mat_sim = mat_sim.loc[pam.index, pam.index]
 
@@ -112,6 +114,7 @@ def get_pam_blosum(mat_sim):
         col=2,
     )
     fig.update_layout(
+        title="PAM vs ESM mutation probability",
         paper_bgcolor="rgba(0,0,0,0)",
         # plot_bgcolor="rgba(0,0,0,0)",
     )
@@ -121,38 +124,18 @@ def get_pam_blosum(mat_sim):
 
 
 def plot_corr(mat_sim):
-    def get_corr(mat1, mat2):
-        return pd.Series(mat1.values.reshape(-1)).corr(pd.Series(mat2.values.reshape(-1)))
-
-    def get_pam(number: int):
-        return pd.read_csv(f"ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/PAM{number}", sep="\s+", comment="#").iloc[
-            :20, :20
-        ]
-
-    def get_blosum(number: int):
-        return pd.read_csv(f"ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/BLOSUM{number}", sep="\s+", comment="#").iloc[
-            :20, :20
-        ]
-
     col = ["#ab325a"]
-    corrs = []
-    for i in [10, 30, 50, 100, 150, 500]:
-        pam = get_pam(i)
-        corrs.append((i, get_corr(mat_sim, pam)))
-
-    corrs = pd.DataFrame(corrs, columns=["number", "corr"])
-
-    corrs["corr"] = -corrs["corr"]
+    corrs = pd.read_csv("/scratch/human_prot_400_500/pam_esm_corr.csv")
     fig = px.line(
         corrs,
         x="number",
         y="corr",
         color_discrete_sequence=col,
-        title="Сorelation betwin PAM and ESM",
         width=500,
         height=500,
     )
     fig.update_layout(
+        title="PAM and ESM Pearson correlation vs PAM number",
         legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
         margin=dict(l=20, r=20, t=40, b=20),
         paper_bgcolor="rgba(0,0,0,0)",
@@ -175,7 +158,9 @@ def tsne_mut(mut):
         hover_name="name",
         width=900,
         height=700,
+        title="t-SNE visualisation of human proteins and their mutations",
     )
+    fig.update_layout(margin=dict(l=20, r=20, t=40, b=20))
     return fig
 
 
@@ -190,6 +175,7 @@ def tsne_rand(rand, wt):
     data["y"] = reduced[:, 1]
     fig = px.scatter(data, "x", "y", color="source", hover_name="name", width=700, height=700)
     fig.update_layout(
+        title="t-SNE visualisation of human vs randomly generated proteins",
         legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
         margin=dict(l=20, r=20, t=40, b=20),
     )
@@ -212,8 +198,6 @@ tsne_rand = tsne_rand(rand, wt)
 app.layout = html.Div(
     children=[
         html.H1(children="Show me what you got!"),
-        html.H3(children="What can you do with ESM!"),
-        html.H4("Allosteric mutability distribution"),
         html.Div(
             style={"display": "flex", "flex-direction": "row"},
             children=[
