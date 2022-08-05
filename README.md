@@ -6,3 +6,8 @@ Even though the origin of biological sequences is highly dissimilar to those of 
 
 Researchers from facebook utilised the exact same approach and trained a high capacity transformer on evolutionary data. The resulting model is able to predict remote homology and even infer the structure from sequence. Model is also trained to fill the artificial gaps in the sequence, choosing the right amino acid.
 Still, even the best of us make mistakes. This statement also applies to machine learning. Most algorithms have their limitations and fallacies. When model fails to generate the coherent text in human language we are fast to point out the nonsense. But no one can speak the protein language and seeing the mistakes with a naked eye becomes impossible. Our project aims to find out such limitations in the work of ESM. 
+
+
+# Links:
+- https://doi.org/10.1073/pnas.2016239118
+- 
